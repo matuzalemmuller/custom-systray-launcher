@@ -3,62 +3,64 @@ from PyQt5.QtWidgets import *
 import psutil
 import subprocess
 
-app = QApplication([])
-app.setQuitOnLastWindowClosed(False)
+APP_NAME='ladder'
+ICON_ACTIVE='icons/icon_active.png'
+ICON_INACTIVE='icons/icon_inactive.png'
+PROCESS=['/home/matuzalem/dev/ladder-systray/bin/ladder', '-r', 'https://t.ly/14PSf']
 
-# Adding an icon 
-icon_active = QIcon("icons/icon_active.png") 
-icon_inactive = QIcon("icons/icon_inactive.png") 
-
-# Adding item on the menu bar 
-tray = QSystemTrayIcon() 
-tray.setIcon(icon_inactive) 
-tray.setVisible(True) 
-
-# Creating the options 
-menu = QMenu() 
-option = QAction("Start")
-menu.addAction(option)
-
-# Kills ladder if running
-def kill_ladder():
+# Kill app if already running
+def kill_app(systray, icon_inactive, systray_option):
     for p in psutil.process_iter():
-        if 'ladder' in p.name() or 'ladder' in ' '.join(p.cmdline()):
+        if APP_NAME in p.name() or APP_NAME in ' '.join(p.cmdline()):
             p.terminate()
             p.wait()
-            tray.setIcon(icon_inactive)
-            option.setText('Start')
             return True
     return False
 
-# Start/stop ladder
-def start_stop_ladder():
-    if not kill_ladder():
-        result = subprocess.Popen(['/home/matuzalem/dev/ladder-systray/bin/ladder', '-r', 'https://t.ly/14PSf'])
-        tray.setIcon(icon_active)
-        option.setText('Stop')
+# Start/stop app
+def start_stop_app(systray, icon_inactive, icon_active, systray_option):
+    if kill_app(systray, icon_inactive, systray_option):
+        systray_option.setText('Start')
+        systray.setIcon(icon_inactive)
+    else:
+        result = subprocess.Popen(PROCESS)
+        systray_option.setText('Stop')
+        systray.setIcon(icon_active)
 
 # Quit app
-def quit_app():
-    kill_ladder()
+def quit_app(app, systray, icon_inactive, systray_option):
+    kill_app(systray, icon_inactive, systray_option)
     app.quit()
 
-# Linking QAction with function above
-option.triggered.connect(start_stop_ladder)
+# Create Qt app 
+app = QApplication([])
+app.setQuitOnLastWindowClosed(False)
 
-# To quit the app
+# Add an icon 
+icon_active = QIcon(ICON_ACTIVE) 
+icon_inactive = QIcon(ICON_INACTIVE) 
+
+# Add item on the menu bar 
+systray = QSystemTrayIcon() 
+systray.setIcon(icon_inactive) 
+systray.setVisible(True)
+
+# Create the options 
+menu = QMenu() 
+systray_option = QAction("Start")
+menu.addAction(systray_option)
+systray_option.triggered.connect(lambda: start_stop_app(systray, icon_inactive, icon_active, systray_option))
+
 quit_option = QAction("Quit")
 menu.addAction(quit_option)
-quit_option.triggered.connect(quit_app)
+quit_option.triggered.connect(lambda: quit_app(app, systray, icon_inactive, systray_option))
+systray.activated.connect(lambda: start_stop_app(systray, icon_inactive, icon_active, systray_option))
 
-# Open when left-clicking the icon
-tray.activated.connect(start_stop_ladder)
+# Add options to the System Tray
+systray.setContextMenu(menu)
 
-# Adding options to the System Tray
-tray.setContextMenu(menu)
-
-# Kills all instances of ladder before starting the system tray
-while kill_ladder():
+# Kill all instances of the app before starting the system tray
+while kill_app(systray, icon_inactive, systray_option):
     pass
 
 app.exec_()
