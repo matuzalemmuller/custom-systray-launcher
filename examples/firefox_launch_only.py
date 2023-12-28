@@ -12,11 +12,11 @@ import sys
 import threading
 
 ###############################  CONFIGURE HERE ###############################
-LAUNCH_ONLY = False
-ICON_ACTIVE = ""
+LAUNCH_ONLY = True
+ICON_ACTIVE = "icons/firefox_icon_active.png"
 ICON_INACTIVE = ""
 ICON_WARNING = ""
-PROCESS = [""]
+PROCESS = ["firefox"]
 ###############################################################################
 PID = 0
 

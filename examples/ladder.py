@@ -13,10 +13,10 @@ import threading
 
 ###############################  CONFIGURE HERE ###############################
 LAUNCH_ONLY = False
-ICON_ACTIVE = ""
-ICON_INACTIVE = ""
-ICON_WARNING = ""
-PROCESS = [""]
+ICON_ACTIVE = "icons/ladder_icon_active.png"
+ICON_INACTIVE = "icons/ladder_icon_inactive.png"
+ICON_WARNING = "icons/warning.png"
+PROCESS = ["ladder", "-r", "https://t.ly/14PSf"]
 ###############################################################################
 PID = 0
 
