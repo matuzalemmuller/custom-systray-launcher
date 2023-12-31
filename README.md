@@ -31,4 +31,4 @@ Simply change the variables in the script and run it.
 
 # TODO
 
-Nothing to do so far. I put this script together to solve a need I had, and decided to make it open source. There are many places where it can be improved but it works well enough for me.
+[] Allow process termination via command instead of pid kill.
