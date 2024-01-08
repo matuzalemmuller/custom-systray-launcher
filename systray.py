@@ -12,11 +12,12 @@ import sys
 import threading
 
 ###############################  CONFIGURE HERE ###############################
-LAUNCH_ONLY = False
-ICON_ACTIVE = ""
-ICON_INACTIVE = ""
-ICON_WARNING = ""
-PROCESS = [""]
+LAUNCH_ONLY = False   # (required) If the program will only be launched of started+stopped
+PROCESS = [""]        # (required) Command to start the process
+STOP_PROCESS = [""]   # Command to stop the process (if not provided, pid from PROCESS will be killed if LAUNCH_ONLY is False)
+ICON_ACTIVE = ""      # (required) Systray icon
+ICON_INACTIVE = ""    # (required if LAUNCH_ONLY is True) Icon for inactive in case behavior is start/stop
+ICON_WARNING = ""     # (required if LAUNCH_ONLY is True) Icon for pid died while running in case behavior is start/stop
 ###############################################################################
 PID = 0
 
@@ -47,6 +48,18 @@ class CheckPIDStatus(threading.Thread):
             sleep(5)
 
 
+def check_variables():
+    if any(var not in globals() for var in ('LAUNCH_ONLY','PROCESS','ICON_ACTIVE')):
+        logging.error("Missing one or more required variables: LAUNCH_ONLY, PROCESS, ICON_ACTIVE")
+        sys.exit(1)
+    if not LAUNCH_ONLY and any(var not in globals() for var in ('ICON_INACTIVE','ICON_WARNING')):
+        logging.error("Missing one or more required variables: ICON_INACTIVE, ICON_WARNING (LAUNCH_ONLY is False)")
+        sys.exit(1)
+    else:
+        if 'STOP_PROCESS' in globals():
+            logging.info("STOP_PROCESS is provided but LAUNCH_ONLY is True")
+
+
 # Kill app if already running
 def kill_running_process():
     global PID
@@ -68,7 +81,13 @@ def start_stop_app(systray, icon_inactive, icon_active, icon_warning, systray_op
     global PID
     if not LAUNCH_ONLY:
         if systray_option.text() == "Stop":
-            if kill_running_process():
+            if 'STOP_PROCESS' in globals() and STOP_PROCESS[0] != "":
+                result = subprocess.Popen(STOP_PROCESS, shell=False, preexec_fn=os.setsid)
+                PID = 0
+                logging.info(f"Stopped process gracefully")
+                systray_option.setText("Start")
+                systray.setIcon(icon_inactive)
+            elif kill_running_process():
                 systray_option.setText("Start")
                 systray.setIcon(icon_inactive)
             else:
@@ -95,6 +114,8 @@ def quit_app(app, systray, icon_inactive, systray_option, thread):
 
 
 def main():
+    check_variables()
+
     # Create Qt app
     app = QApplication([])
     app.setQuitOnLastWindowClosed(False)

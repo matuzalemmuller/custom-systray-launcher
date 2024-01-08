@@ -28,7 +28,8 @@ Simply change the variables in the script and run it.
 |`ICON_INACTIVE`|Path to icon to be displayed when the app is not running. Optional if `LAUNCH_ONLY` is set to `True`|
 |`ICON_WARNING`|Path to icon to be displayed when a process is identified to have crashed/stopped running unexpectedly. Optional if `LAUNCH_ONLY` is set to `True`|
 |`PROCESS`|Process to launch - note the [subprocess.Popen](https://docs.python.org/3/library/subprocess.html#subprocess.Popen) syntax|
+|`STOP_PROCESS` (untested/experimental)|Command to stop process. If not provided, the process PID will be killed. Note the [subprocess.Popen](https://docs.python.org/3/library/subprocess.html#subprocess.Popen) syntax|
 
 # TODO
 
-[] Allow process termination via command instead of pid kill.
+Nothing to do so far. I put this script together to solve a need I had, and decided to make it open source. There are many places where it can be improved but it works well enough for me.
